@@ -12,7 +12,6 @@
 'use strict';
 
 const http = require('http');
-const { ethers } = require('ethers');
 
 const FACILITATOR_PORT = parseInt(process.env.FACILITATOR_PORT || '3001', 10);
 let _clients = null;
@@ -28,7 +27,6 @@ async function getClients() {
   const network = process.env.X402_NETWORK || 'base-sepolia';
   const chain   = network === 'base' ? base : baseSepolia;
 
-  // Use Alchemy for both mainnet and testnet — more reliable than public endpoints
   const alchemyKey = process.env.ALCHEMY_API_KEY;
   const rpcUrl = network === 'base'
     ? `https://base-mainnet.g.alchemy.com/v2/${alchemyKey}`
@@ -51,14 +49,23 @@ async function handleVerify(body) {
   const { exact } = require('./node_modules/x402/dist/cjs/schemes/index.js');
   const { publicClient } = await getClients();
   const { paymentPayload, paymentRequirements } = body;
-  return await exact.evm.verify(publicClient, paymentPayload, paymentRequirements);
+  console.log('VERIFY paymentPayload:', JSON.stringify(paymentPayload, null, 2));
+  console.log('VERIFY paymentRequirements:', JSON.stringify(paymentRequirements, null, 2));
+  const result = await exact.evm.verify(publicClient, paymentPayload, paymentRequirements);
+  console.log('VERIFY result:', JSON.stringify(result, null, 2));
+  return result;
 }
 
 async function handleSettle(body) {
   const { exact } = require('./node_modules/x402/dist/cjs/schemes/index.js');
-  const { walletClient } = await getClients();
+  const { walletClient, publicClient } = await getClients();
   const { paymentPayload, paymentRequirements } = body;
-  const result = await exact.evm.settle(walletClient, paymentPayload, paymentRequirements);
+
+  // Merge publicClient into walletClient — x402 settle needs verifyTypedData
+  // which is only on publicClient, but writeContract which is only on walletClient
+  const client = { ...publicClient, ...walletClient };
+
+  const result = await exact.evm.settle(client, paymentPayload, paymentRequirements);
   if (result.success) {
     console.log(`✅ x402 settled — tx: ${result.transaction}`);
   } else {
