@@ -58,7 +58,7 @@ initERC8128().catch(e => console.error('ERC-8128 init failed:', e.message));
 // To switch to mainnet: set X402_NETWORK=base in .env (no code changes needed)
 
 const { paymentMiddleware } = require('x402-express');
-const { startFacilitatorServer, FACILITATOR_PORT } = require('./facilitator');
+const { startFacilitatorServer, FACILITATOR_PORT } = require('./Facilitator');
 
 const PAY_TO_ADDRESS = process.env.PAY_TO_ADDRESS || '0xF6F4bFC77c1d3cbbF39802BaBFb6f0Ba90178214';
 const X402_NETWORK   = process.env.X402_NETWORK   || 'base-sepolia';
@@ -396,40 +396,26 @@ async function handleGenerate() {
       const validAfterStr  = String(validAfter);
       const validBeforeStr = String(validBefore);
 
-      // MetaMask requires EIP712Domain explicitly in types for correct signing
-      const typedData = {
-        types: {
-          EIP712Domain: [
-            { name: 'name',              type: 'string'  },
-            { name: 'version',           type: 'string'  },
-            { name: 'chainId',           type: 'uint256' },
-            { name: 'verifyingContract', type: 'address' },
-          ],
-          TransferWithAuthorization: [
-            { name: 'from',        type: 'address' },
-            { name: 'to',          type: 'address' },
-            { name: 'value',       type: 'uint256' },
-            { name: 'validAfter',  type: 'uint256' },
-            { name: 'validBefore', type: 'uint256' },
-            { name: 'nonce',       type: 'bytes32' },
-          ],
-        },
-        domain: { name: tokenName, version: tokenVersion, chainId, verifyingContract: asset },
-        primaryType: 'TransferWithAuthorization',
-        message: {
-          from: signerAddress,
-          to: payTo,
-          value: amountStr,
-          validAfter: validAfterStr,
-          validBefore: validBeforeStr,
-          nonce,
-        },
+      const domain = { name: tokenName, version: tokenVersion, chainId, verifyingContract: asset };
+      const types = {
+        TransferWithAuthorization: [
+          { name: 'from',        type: 'address' },
+          { name: 'to',          type: 'address' },
+          { name: 'value',       type: 'uint256' },
+          { name: 'validAfter',  type: 'uint256' },
+          { name: 'validBefore', type: 'uint256' },
+          { name: 'nonce',       type: 'bytes32' },
+        ],
+      };
+      const message = {
+        from: signerAddress, to: payTo,
+        value: amountStr, validAfter: validAfterStr, validBefore: validBeforeStr, nonce,
       };
 
       status.textContent = '[2/3] Sign $0.50 USDC payment (MetaMask) →';
       const paymentSig = await window.ethereum.request({
         method: 'eth_signTypedData_v4',
-        params: [signerAddress, JSON.stringify(typedData)],
+        params: [signerAddress, JSON.stringify({ domain, types, primaryType: 'TransferWithAuthorization', message })],
       });
       status.textContent = '✓ Payment signed';
 
