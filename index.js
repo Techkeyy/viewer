@@ -396,26 +396,40 @@ async function handleGenerate() {
       const validAfterStr  = String(validAfter);
       const validBeforeStr = String(validBefore);
 
-      const domain = { name: tokenName, version: tokenVersion, chainId, verifyingContract: asset };
-      const types = {
-        TransferWithAuthorization: [
-          { name: 'from',        type: 'address' },
-          { name: 'to',          type: 'address' },
-          { name: 'value',       type: 'uint256' },
-          { name: 'validAfter',  type: 'uint256' },
-          { name: 'validBefore', type: 'uint256' },
-          { name: 'nonce',       type: 'bytes32' },
-        ],
-      };
-      const message = {
-        from: signerAddress, to: payTo,
-        value: amountStr, validAfter: validAfterStr, validBefore: validBeforeStr, nonce,
+      // MetaMask requires EIP712Domain explicitly in types for correct signing
+      const typedData = {
+        types: {
+          EIP712Domain: [
+            { name: 'name',              type: 'string'  },
+            { name: 'version',           type: 'string'  },
+            { name: 'chainId',           type: 'uint256' },
+            { name: 'verifyingContract', type: 'address' },
+          ],
+          TransferWithAuthorization: [
+            { name: 'from',        type: 'address' },
+            { name: 'to',          type: 'address' },
+            { name: 'value',       type: 'uint256' },
+            { name: 'validAfter',  type: 'uint256' },
+            { name: 'validBefore', type: 'uint256' },
+            { name: 'nonce',       type: 'bytes32' },
+          ],
+        },
+        domain: { name: tokenName, version: tokenVersion, chainId, verifyingContract: asset },
+        primaryType: 'TransferWithAuthorization',
+        message: {
+          from: signerAddress,
+          to: payTo,
+          value: amountStr,
+          validAfter: validAfterStr,
+          validBefore: validBeforeStr,
+          nonce,
+        },
       };
 
       status.textContent = '[2/3] Sign $0.50 USDC payment (MetaMask) →';
       const paymentSig = await window.ethereum.request({
         method: 'eth_signTypedData_v4',
-        params: [signerAddress, JSON.stringify({ domain, types, primaryType: 'TransferWithAuthorization', message })],
+        params: [signerAddress, JSON.stringify(typedData)],
       });
       status.textContent = '✓ Payment signed';
 
