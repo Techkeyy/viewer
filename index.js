@@ -58,7 +58,7 @@ initERC8128().catch(e => console.error('ERC-8128 init failed:', e.message));
 // To switch to mainnet: set X402_NETWORK=base in .env (no code changes needed)
 
 const { paymentMiddleware } = require('x402-express');
-const { startFacilitatorServer, FACILITATOR_PORT } = require('./facilitator');
+const { startFacilitatorServer, FACILITATOR_PORT } = require('./Facilitator');
 
 const PAY_TO_ADDRESS = process.env.PAY_TO_ADDRESS || '0xF6F4bFC77c1d3cbbF39802BaBFb6f0Ba90178214';
 const X402_NETWORK   = process.env.X402_NETWORK   || 'base-sepolia';
