@@ -1,0 +1,24 @@
+{
+  "name": "viewer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@coinbase/x402": "^2.1.0",
+    "@slicekit/erc8128": "^0.3.3",
+    "axios": "^1.13.6",
+    "dotenv": "^17.3.1",
+    "ethers": "^6.16.0",
+    "express": "^5.2.1",
+    "groq-sdk": "^1.1.1",
+    "viem": "^2.47.6",
+    "x402-express": "^1.1.0"
+  }
+}
