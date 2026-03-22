@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const { analyzeWallet } = require('./agent');
+const crypto = require('crypto');
 
 // ─── ERC-8128 SDK SETUP ───────────────────────────────────────────────────────
 // @slicekit/erc8128 is ESM-only; we load it once via dynamic import at startup.
