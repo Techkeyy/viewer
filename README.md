@@ -232,4 +232,4 @@ VIEWER gives AI agents and their operators a way to **verify wallet reputation o
 
 ---
 
-*Built at The Synthesis · March 2025*
+*Built at The Synthesis · March 2026*
