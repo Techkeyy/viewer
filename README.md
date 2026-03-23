@@ -6,12 +6,8 @@ VIEWER lets anyone paste an Ethereum wallet address, sign a request with MetaMas
 
 ---
 
-## Live Demo
-
-```
-npm install
-cp _env .env       # rename the env file
-node index.js      # server starts at http://localhost:3000
+## Live Demo: https://viewerr.up.railway.app/
+# Video Demo: https://www.youtube.com/watch?v=DBlCh_a_mvM
 ```
 
 ---
